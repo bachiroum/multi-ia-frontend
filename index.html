@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Multipiste — comparateur d'IA</title>
+<style>
+  :root {
+    --ink: #14161a;
+    --panel: #1c1f26;
+    --panel-2: #23262e;
+    --line: #333844;
+    --fog: #9aa1ad;
+    --paper: #eef0f3;
+    --copper: #c98a5e;
+    --copper-dim: #8a6248;
+    --ok: #7fb894;
+    --err: #d9765f;
+    --mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .brand .mark {
+    font-family: var(--mono);
+    color: var(--copper);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    border: 1px solid var(--copper-dim);
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+
+  h1 {
+    margin: 10px 0 4px;
+    font-size: 26px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    margin: 0;
+    color: var(--fog);
+    font-size: 14px;
+  }
+
+  main {
+    padding: 24px 32px 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .composer {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 22px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 84px;
+    resize: vertical;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--paper);
+    font-family: var(--sans);
+    font-size: 15px;
+    padding: 12px 14px;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--copper-dim);
+  }
+
+  .models-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .model-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 7px 14px 7px 10px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--fog);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .model-chip input { accent-color: var(--copper); }
+
+  .model-chip.active {
+    color: var(--paper);
+    border-color: var(--copper-dim);
+  }
+
+  .composer-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  button.run {
+    background: var(--copper);
+    color: var(--ink);
+    border: none;
+    border-radius: 7px;
+    padding: 10px 22px;
+    font-weight: 650;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  button.run:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.run:not(:disabled):hover { opacity: 0.88; }
+
+  .tracks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .track {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 160px;
+  }
+
+  .track-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel-2);
+  }
+
+  .track-head .name {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--paper);
+  }
+
+  .track-head .status {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--fog);
+  }
+
+  .track-head .status.ok { color: var(--ok); }
+  .track-head .status.err { color: var(--err); }
+
+  .track-body {
+    padding: 14px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    flex: 1;
+  }
+
+  .track-body.error { color: var(--err); font-family: var(--mono); font-size: 12.5px; }
+
+  .pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--copper);
+    display: inline-block;
+    animation: pulse 1.1s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+
+  .empty {
+    color: var(--fog);
+    font-size: 13.5px;
+    text-align: center;
+    padding: 40px 20px;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="mark">MULTIPISTE</span>
+  </div>
+  <h1>Comparateur multi-modèles</h1>
+  <p>Un prompt, plusieurs pistes qui s'enregistrent en même temps.</p>
+</header>
+
+<main>
+  <div class="composer">
+    <textarea id="prompt" placeholder="Écris ton prompt ici…"></textarea>
+    <div class="models-row" id="modelsRow"></div>
+    <div class="composer-footer">
+      <button class="run" id="runBtn">Lancer la comparaison</button>
+    </div>
+  </div>
+
+  <div id="tracks" class="tracks">
+    <div class="empty">Choisis des modèles et lance une requête pour voir les résultats côte à côte.</div>
+  </div>
+</main>
+
+<script>
+  const BACKEND_URL = window.MULTIPISTE_BACKEND_URL || "https://multi-ia-backend-production.up.railway.app";
+
+  const modelsRow = document.getElementById("modelsRow");
+  const tracksEl = document.getElementById("tracks");
+  const promptEl = document.getElementById("prompt");
+  const runBtn = document.getElementById("runBtn");
+
+  let selectedModels = new Set();
+
+  async function loadModels() {
+    const res = await fetch(`${BACKEND_URL}/api/models`);
+    const models = await res.json();
+    modelsRow.innerHTML = "";
+    models.forEach((m, i) => {
+      const label = document.createElement("label");
+      label.className = "model-chip";
+      label.innerHTML = `<input type="checkbox" value="${m.id}" ${i < 2 ? "checked" : ""}/> ${m.label}`;
+      const checkbox = label.querySelector("input");
+      if (checkbox.checked) { selectedModels.add(m.id); label.classList.add("active"); }
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked) { selectedModels.add(m.id); label.classList.add("active"); }
+        else { selectedModels.delete(m.id); label.classList.remove("active"); }
+      });
+      modelsRow.appendChild(label);
+    });
+  }
+
+  function renderTracksLoading(models) {
+    tracksEl.innerHTML = "";
+    models.forEach((id) => {
+      const track = document.createElement("div");
+      track.className = "track";
+      track.id = `track-${cssSafe(id)}`;
+      track.innerHTML = `
+        <div class="track-head">
+          <span class="name">${id}</span>
+          <span class="status"><span class="pulse"></span> en cours</span>
+        </div>
+        <div class="track-body"></div>
+      `;
+      tracksEl.appendChild(track);
+    });
+  }
+
+  function cssSafe(id) { return id.replace(/[^a-z0-9]/gi, "_"); }
+
+  // Ajoute un fragment de texte à une piste au fil de l'arrivée des tokens
+  function appendDelta(model, delta) {
+    const track = document.getElementById(`track-${cssSafe(model)}`);
+    if (!track) return;
+    track.querySelector(".track-body").textContent += delta;
+  }
+
+  function markDone(model, ms) {
+    const track = document.getElementById(`track-${cssSafe(model)}`);
+    if (!track) return;
+    const status = track.querySelector(".status");
+    status.textContent = `${ms} ms`;
+    status.className = "status ok";
+  }
+
+  function markError(model, error) {
+    const track = document.getElementById(`track-${cssSafe(model)}`);
+    if (!track) return;
+    const status = track.querySelector(".status");
+    status.textContent = "erreur";
+    status.className = "status err";
+    const body = track.querySelector(".track-body");
+    body.textContent = error;
+    body.classList.add("error");
+  }
+
+  // Lit le flux SSE renvoyé par le backend et distribue chaque événement
+  // vers la bonne piste au fur et à mesure, sans attendre la fin de tout.
+  async function consumeStream(response) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const chunks = buffer.split("\n\n");
+      buffer = chunks.pop();
+
+      for (const chunk of chunks) {
+        const line = chunk.trim();
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload) continue;
+        const event = JSON.parse(payload);
+
+        if (event.allDone) continue;
+        if (event.delta) appendDelta(event.model, event.delta);
+        else if (event.error) markError(event.model, event.error);
+        else if (event.done) markDone(event.model, event.ms);
+      }
+    }
+  }
+
+  async function runComparison() {
+    const prompt = promptEl.value.trim();
+    const models = [...selectedModels];
+    if (!prompt || models.length === 0) return;
+
+    runBtn.disabled = true;
+    renderTracksLoading(models);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/compare-stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, models }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        tracksEl.innerHTML = `<div class="empty">${data.error || "Erreur serveur."}</div>`;
+      } else {
+        await consumeStream(res);
+      }
+    } catch (err) {
+      tracksEl.innerHTML = `<div class="empty">Impossible de joindre le serveur : ${err.message}</div>`;
+    } finally {
+      runBtn.disabled = false;
+    }
+  }
+
+  runBtn.addEventListener("click", runComparison);
+  loadModels();
+</script>
+
+</body>
+</html>
