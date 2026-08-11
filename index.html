@@ -36,39 +36,57 @@
   .shell { display: flex; min-height: 100vh; }
 
   /* ---------- SIDEBAR ---------- */
+  .sidebar-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 40;
+  }
+  .sidebar-overlay.open { display: block; }
+
   .sidebar {
-    width: 224px;
+    width: 232px;
     flex-shrink: 0;
     background: var(--sidebar);
     border-right: 1px solid var(--line);
-    padding: 20px 14px;
+    padding: 18px 12px 16px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
   }
 
   .logo {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 9px;
     font-family: var(--display);
     font-weight: 700;
-    font-size: 16.5px;
-    padding: 6px 8px 20px;
+    font-size: 16px;
+    padding: 6px 8px 18px;
   }
+
+  .logo .mark { display: flex; align-items: center; gap: 9px; }
 
   .logo .dot {
     width: 10px; height: 10px; border-radius: 3px;
     background: linear-gradient(135deg, var(--violet), var(--cyan));
     transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  .close-sidebar {
+    display: none;
+    background: none; border: none; color: var(--text-dim);
+    font-size: 18px; cursor: pointer; padding: 4px;
   }
 
   .nav-item {
     display: flex;
     align-items: center;
-    gap: 11px;
-    padding: 10px 12px;
-    border-radius: 10px;
+    gap: 12px;
+    padding: 9px 10px;
+    border-radius: 12px;
     color: var(--text-dim);
     font-size: 13.5px;
     font-weight: 500;
@@ -80,23 +98,39 @@
   .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
 
   .nav-item.active {
-    background: rgba(139,92,246,0.12);
-    border-color: rgba(139,92,246,0.3);
+    background: rgba(139,92,246,0.14);
+    border-color: rgba(139,92,246,0.32);
     color: var(--text);
   }
 
   .nav-item .icon {
-    width: 17px; text-align: center; font-size: 14px;
+    width: 32px; height: 32px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 9px;
+    background: var(--icon-bg, rgba(139,92,246,0.16));
+  }
+  .nav-item .icon svg {
+    width: 16px; height: 16px; stroke: var(--icon-fg, var(--violet-soft));
+    fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
   }
 
+  .nav-item .stack { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .nav-item .label { font-weight: 600; font-size: 13px; color: var(--text); line-height: 1.25; }
+  .nav-item .sublabel {
+    font-size: 11px; color: var(--text-faint); line-height: 1.25;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .nav-item.active .sublabel { color: var(--text-dim); }
+
   .nav-item .soon {
-    margin-left: auto;
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 8px;
     color: var(--gold);
     background: rgba(251,191,36,0.12);
-    padding: 2px 6px;
-    border-radius: 8px;
+    padding: 2px 5px;
+    border-radius: 7px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .nav-sep {
@@ -104,20 +138,47 @@
     font-size: 10px;
     color: var(--text-faint);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 16px 12px 6px;
+    letter-spacing: 0.09em;
+    padding: 17px 10px 7px;
   }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 12px 11px 4px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--text-faint); flex-shrink: 0;
+  }
+  .status-dot.online { background: var(--lime); box-shadow: 0 0 8px var(--lime); }
+  .status-dot.offline { background: var(--coral); }
 
   /* ---------- MAIN ---------- */
   .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
   .topbar {
-    padding: 18px 28px;
+    padding: 16px 24px;
     border-bottom: 1px solid var(--line);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 14px;
   }
+
+  .hamburger {
+    display: none;
+    background: var(--panel-solid); border: 1px solid var(--line);
+    border-radius: 8px; width: 36px; height: 36px;
+    color: var(--text); cursor: pointer; flex-shrink: 0;
+    align-items: center; justify-content: center;
+  }
+  .hamburger svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; }
 
   .topbar h2 { margin: 0; font-family: var(--display); font-size: 18px; font-weight: 600; }
   .topbar p { margin: 2px 0 0; color: var(--text-dim); font-size: 13px; }
@@ -125,7 +186,135 @@
   .view { display: none; padding: 24px 28px 60px; max-width: 1200px; }
   .view.active { display: block; }
 
+  /* ---------- Responsive ---------- */
+  @media (max-width: 860px) {
+    .sidebar {
+      position: fixed; top: 0; left: 0; height: 100%;
+      z-index: 50; transform: translateX(-100%);
+      transition: transform 0.22s ease;
+      box-shadow: 20px 0 40px rgba(0,0,0,0.4);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .close-sidebar { display: block; }
+    .hamburger { display: flex; }
+    .topbar { padding: 14px 16px; }
+    .view { padding: 18px 16px 50px; }
+    .composer { padding: 16px; }
+  }
+
+  /* ---------- CHAT CONVERSATIONNEL ---------- */
+  .chat-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 20px;
+    min-height: 200px;
+  }
+
+  .bubble-row { display: flex; }
+  .bubble-row.user { justify-content: flex-end; }
+
+  .bubble {
+    max-width: 78%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .bubble.user {
+    background: linear-gradient(120deg, var(--violet), #6d28d9);
+    color: white;
+    border-radius: 16px 16px 4px 16px;
+  }
+  .bubble.assistant {
+    background: var(--panel-solid);
+    border: 1px solid var(--line);
+    border-radius: 16px 16px 16px 4px;
+  }
+  .bubble.error { color: var(--coral); border-color: rgba(251,113,133,0.4); }
+
+  .bubble-meta {
+    font-family: var(--mono); font-size: 10.5px; color: var(--text-faint);
+    margin: 4px 4px 0;
+  }
+
+  .chat-composer {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg);
+    padding-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .model-select {
+    align-self: flex-start;
+    background: var(--panel-solid);
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: 20px;
+    max-width: 100%;
+  }
+
+  .chat-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    background: var(--panel-solid);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 8px 8px 8px 16px;
+  }
+
+  .chat-input-row textarea {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 0;
+    min-height: 24px;
+    max-height: 140px;
+    font-size: 15px;
+  }
+  .chat-input-row textarea:focus { outline: none; border: none; }
+
+  .mic-btn, .send-btn {
+    flex-shrink: 0;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .mic-btn svg, .send-btn svg {
+    width: 17px; height: 17px; stroke: currentColor;
+    fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .mic-btn { background: var(--bg-2); color: var(--text-dim); }
+  .mic-btn:hover { color: var(--text); }
+  .mic-btn.recording { background: rgba(251,113,133,0.18); color: var(--coral); }
+  .mic-btn.recording svg { animation: pulse 1s ease-in-out infinite; }
+  .mic-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .send-btn { background: linear-gradient(120deg, var(--violet), #6d28d9); color: white; }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .typing-dots span {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-dim); margin-right: 3px;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
   /* ---------- COMPOSER (partagé) ---------- */
+
   .composer {
     display: flex;
     flex-direction: column;
@@ -227,39 +416,95 @@
 </head>
 <body>
 
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <div class="shell">
-  <aside class="sidebar">
-    <div class="logo"><span class="dot"></span> Cortex Bench</div>
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <span class="mark"><span class="dot"></span> Cortex Bench</span>
+      <button class="close-sidebar" id="closeSidebar" aria-label="Fermer le menu">✕</button>
+    </div>
 
-    <div class="nav-sep">Texte</div>
-    <div class="nav-item active" data-view="chat"><span class="icon">💬</span> Chat & comparaison</div>
-    <div class="nav-item" data-view="code"><span class="icon">〈/〉</span> Code</div>
-    <div class="nav-item" data-view="docs"><span class="icon">📄</span> Documents</div>
+    <div class="nav-sep">Assistant</div>
+    <div class="nav-item active" data-view="chat">
+      <span class="icon" style="--icon-bg: rgba(139,92,246,0.18); --icon-fg: var(--violet-soft);"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
+      <span class="stack"><span class="label">Chat</span><span class="sublabel">Conversation avec un modèle</span></span>
+    </div>
+    <div class="nav-item" data-view="compare">
+      <span class="icon" style="--icon-bg: rgba(167,139,250,0.18); --icon-fg: var(--violet-soft);"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="14" y="4" width="7" height="16" rx="1.5"/></svg></span>
+      <span class="stack"><span class="label">Comparateur</span><span class="sublabel">Plusieurs modèles à la fois</span></span>
+    </div>
+    <div class="nav-item" data-view="code">
+      <span class="icon" style="--icon-bg: rgba(34,211,238,0.16); --icon-fg: var(--cyan);"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
+      <span class="stack"><span class="label">Code</span><span class="sublabel">Génère et corrige</span></span>
+    </div>
+    <div class="nav-item" data-view="docs">
+      <span class="icon" style="--icon-bg: rgba(251,113,133,0.16); --icon-fg: var(--coral);"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+      <span class="stack"><span class="label">Documents</span><span class="sublabel">Analyse tes fichiers</span></span>
+    </div>
 
-    <div class="nav-sep">Génération</div>
-    <div class="nav-item" data-view="image"><span class="icon">🖼️</span> Images <span class="soon">API requise</span></div>
-    <div class="nav-item" data-view="video"><span class="icon">🎬</span> Vidéo <span class="soon">API requise</span></div>
-    <div class="nav-item" data-view="audio"><span class="icon">🎙️</span> Audio <span class="soon">API requise</span></div>
+    <div class="nav-sep">Studio créatif</div>
+    <div class="nav-item" data-view="image">
+      <span class="icon" style="--icon-bg: rgba(163,230,53,0.16); --icon-fg: var(--lime);"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
+      <span class="stack"><span class="label">Images</span><span class="sublabel">Crée et modifie</span></span>
+      <span class="soon">API requise</span>
+    </div>
+    <div class="nav-item" data-view="video">
+      <span class="icon" style="--icon-bg: rgba(251,191,36,0.16); --icon-fg: var(--gold);"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8.5l-6 3.5 6 3.5z"/></svg></span>
+      <span class="stack"><span class="label">Vidéo</span><span class="sublabel">Donne vie à tes idées</span></span>
+    </div>
+    <div class="nav-item" data-view="audio">
+      <span class="icon" style="--icon-bg: rgba(244,114,182,0.16); --icon-fg: #f472b6;"><svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4"/></svg></span>
+      <span class="stack"><span class="label">Audio</span><span class="sublabel">Voix et musique</span></span>
+      <span class="soon">API requise</span>
+    </div>
+
+    <div class="sidebar-footer">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Vérification du serveur…</span>
+    </div>
   </aside>
 
   <div class="main">
     <div class="topbar">
+      <button class="hamburger" id="openSidebar" aria-label="Ouvrir le menu">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <div>
         <h2 id="topTitle">Chat & comparaison</h2>
         <p id="topSub">Compare plusieurs modèles sur le même prompt, en direct.</p>
       </div>
     </div>
 
-    <!-- CHAT -->
+    <!-- CHAT (conversation avec un seul modèle, façon Gemini) -->
     <div class="view active" id="view-chat">
-      <div class="composer">
-        <textarea id="prompt-chat" placeholder="Écris ton prompt ici…"></textarea>
-        <div class="models-row" id="modelsRow-chat"></div>
-        <div class="composer-footer">
-          <button class="run" id="runBtn-chat">Lancer la comparaison →</button>
+      <div class="chat-thread" id="chatThread">
+        <div class="empty">Choisis un modèle ci-dessous et commence la conversation.</div>
+      </div>
+      <div class="chat-composer">
+        <select id="chatModelSelect" class="model-select"></select>
+        <div class="chat-input-row">
+          <textarea id="prompt-single" placeholder="Écris ton message…" rows="1"></textarea>
+          <button class="mic-btn" id="micBtn" title="Dicter le message" aria-label="Dicter le message">
+            <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4"/></svg>
+          </button>
+          <button class="send-btn" id="sendBtn" title="Envoyer" aria-label="Envoyer">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
         </div>
       </div>
-      <div class="tracks" id="tracks-chat">
+    </div>
+
+    <!-- COMPARATEUR (plusieurs modèles à la fois, sur un seul prompt) -->
+    <div class="view" id="view-compare">
+      <div class="composer">
+        <textarea id="prompt-compare" placeholder="Écris ton prompt ici…"></textarea>
+        <div class="models-row" id="modelsRow-compare"></div>
+        <div class="composer-footer">
+          <button class="run" id="runBtn-compare">Lancer la comparaison →</button>
+        </div>
+      </div>
+      <div class="tracks" id="tracks-compare">
         <div class="empty">Choisis des modèles et lance une requête pour voir les résultats côte à côte.</div>
       </div>
     </div>
@@ -333,7 +578,8 @@
   const TRACK_COLORS = ["#8b5cf6", "#22d3ee", "#fb7185", "#a3e635", "#fbbf24", "#f472b6"];
 
   const TITLES = {
-    chat: ["Chat & comparaison", "Compare plusieurs modèles sur le même prompt, en direct."],
+    chat: ["Chat", "Conversation avec un seul modèle, comme un assistant classique."],
+    compare: ["Comparateur", "Compare plusieurs modèles sur le même prompt, en direct."],
     code: ["Code", "Génère, corrige ou explique du code — comparé sur plusieurs modèles."],
     docs: ["Documents", "Charge un document et pose des questions dessus."],
     image: ["Images", "Génération d'images — nécessite une API supplémentaire."],
@@ -342,6 +588,16 @@
   };
 
   // ---------- Navigation ----------
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("sidebarOverlay");
+
+  function openMobileNav() { sidebar.classList.add("open"); overlay.classList.add("open"); }
+  function closeMobileNav() { sidebar.classList.remove("open"); overlay.classList.remove("open"); }
+
+  document.getElementById("openSidebar").addEventListener("click", openMobileNav);
+  document.getElementById("closeSidebar").addEventListener("click", closeMobileNav);
+  overlay.addEventListener("click", closeMobileNav);
+
   document.querySelectorAll(".nav-item").forEach((item) => {
     item.addEventListener("click", () => {
       document.querySelectorAll(".nav-item").forEach((i) => i.classList.remove("active"));
@@ -351,8 +607,27 @@
       document.getElementById(`view-${key}`).classList.add("active");
       document.getElementById("topTitle").textContent = TITLES[key][0];
       document.getElementById("topSub").textContent = TITLES[key][1];
+      closeMobileNav();
     });
   });
+
+  // ---------- Statut du serveur ----------
+  async function checkServerStatus() {
+    const dot = document.getElementById("statusDot");
+    const text = document.getElementById("statusText");
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/models`);
+      if (res.ok) {
+        dot.className = "status-dot online";
+        text.textContent = "Serveur en ligne";
+      } else {
+        throw new Error("bad status");
+      }
+    } catch {
+      dot.className = "status-dot offline";
+      text.textContent = "Serveur hors ligne";
+    }
+  }
 
   // ---------- Modèles partagés ----------
   let modelColors = {};
@@ -362,10 +637,11 @@
     const res = await fetch(`${BACKEND_URL}/api/models`);
     availableModels = await res.json();
     availableModels.forEach((m, i) => { modelColors[m.id] = TRACK_COLORS[i % TRACK_COLORS.length]; });
-    ["chat", "code", "docs"].forEach(renderModelRow);
+    ["compare", "code", "docs"].forEach(renderModelRow);
+    populateChatModelSelect();
   }
 
-  const selected = { chat: new Set(), code: new Set(), docs: new Set() };
+  const selected = { compare: new Set(), code: new Set(), docs: new Set() };
 
   function renderModelRow(scope) {
     const row = document.getElementById(`modelsRow-${scope}`);
@@ -476,8 +752,8 @@
   }
 
   // ---------- Chat ----------
-  document.getElementById("runBtn-chat").addEventListener("click", () => {
-    runScope("chat", document.getElementById("prompt-chat").value);
+  document.getElementById("runBtn-compare").addEventListener("click", () => {
+    runScope("compare", document.getElementById("prompt-compare").value);
   });
 
   // ---------- Code ----------
@@ -559,8 +835,162 @@
     }
   });
 
+  // ---------- Chat conversationnel (façon Gemini) ----------
+  const chatThread = document.getElementById("chatThread");
+  const chatModelSelect = document.getElementById("chatModelSelect");
+  const promptSingle = document.getElementById("prompt-single");
+  const sendBtn = document.getElementById("sendBtn");
+  const micBtn = document.getElementById("micBtn");
+
+  let chatHistory = []; // { role: 'user'|'assistant', content: string }
+
+  function populateChatModelSelect() {
+    chatModelSelect.innerHTML = availableModels
+      .map((m) => `<option value="${m.id}">${m.label}</option>`)
+      .join("");
+  }
+
+  function renderBubble(role, text) {
+    if (chatThread.querySelector(".empty")) chatThread.innerHTML = "";
+    const row = document.createElement("div");
+    row.className = `bubble-row ${role}`;
+    const bubble = document.createElement("div");
+    bubble.className = `bubble ${role}`;
+    bubble.textContent = text;
+    row.appendChild(bubble);
+    chatThread.appendChild(row);
+    chatThread.scrollTop = chatThread.scrollHeight;
+    return bubble;
+  }
+
+  // Construit un prompt unique à partir de l'historique — le backend actuel
+  // ne gère pas nativement les tours de conversation, donc on les rejoue en texte.
+  function buildContextPrompt(newMessage) {
+    const transcript = chatHistory
+      .map((m) => `${m.role === "user" ? "Utilisateur" : "Assistant"} : ${m.content}`)
+      .join("\n");
+    return transcript
+      ? `${transcript}\nUtilisateur : ${newMessage}\nAssistant :`
+      : newMessage;
+  }
+
+  async function sendChatMessage() {
+    const text = promptSingle.value.trim();
+    const model = chatModelSelect.value;
+    if (!text || !model) return;
+
+    renderBubble("user", text);
+    chatHistory.push({ role: "user", content: text });
+    promptSingle.value = "";
+    promptSingle.style.height = "auto";
+    sendBtn.disabled = true;
+
+    const assistantBubble = renderBubble("assistant", "");
+    let fullReply = "";
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/compare-stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: buildContextPrompt(text), models: [model] }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        assistantBubble.textContent = data.error || "Erreur serveur.";
+        assistantBubble.classList.add("error");
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop();
+        for (const chunk of chunks) {
+          const line = chunk.trim();
+          if (!line.startsWith("data:")) continue;
+          const payload = line.slice(5).trim();
+          if (!payload) continue;
+          const event = JSON.parse(payload);
+          if (event.delta) {
+            fullReply += event.delta;
+            assistantBubble.textContent = fullReply;
+            chatThread.scrollTop = chatThread.scrollHeight;
+          } else if (event.error) {
+            assistantBubble.textContent = event.error;
+            assistantBubble.classList.add("error");
+          }
+        }
+      }
+      chatHistory.push({ role: "assistant", content: fullReply });
+    } catch (err) {
+      assistantBubble.textContent = `Impossible de joindre le serveur : ${err.message}`;
+      assistantBubble.classList.add("error");
+    } finally {
+      sendBtn.disabled = false;
+    }
+  }
+
+  sendBtn.addEventListener("click", sendChatMessage);
+  promptSingle.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendChatMessage();
+    }
+  });
+  promptSingle.addEventListener("input", () => {
+    promptSingle.style.height = "auto";
+    promptSingle.style.height = Math.min(promptSingle.scrollHeight, 140) + "px";
+  });
+
+  // ---------- Dictée vocale ----------
+  // Web Speech API : disponible sur Chrome/Android, PAS sur Safari iOS
+  // (limitation d'Apple). On désactive proprement le bouton si absent.
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognizer = null;
+  let isRecording = false;
+
+  if (SpeechRecognition) {
+    recognizer = new SpeechRecognition();
+    recognizer.lang = "fr-FR";
+    recognizer.interimResults = false;
+    recognizer.continuous = false;
+
+    recognizer.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      promptSingle.value += (promptSingle.value ? " " : "") + transcript;
+      promptSingle.dispatchEvent(new Event("input"));
+    };
+    recognizer.onend = () => {
+      isRecording = false;
+      micBtn.classList.remove("recording");
+    };
+    recognizer.onerror = () => {
+      isRecording = false;
+      micBtn.classList.remove("recording");
+    };
+
+    micBtn.addEventListener("click", () => {
+      if (isRecording) {
+        recognizer.stop();
+      } else {
+        isRecording = true;
+        micBtn.classList.add("recording");
+        recognizer.start();
+      }
+    });
+  } else {
+    micBtn.disabled = true;
+    micBtn.title = "Dictée non supportée par ce navigateur (Safari iOS ne la propose pas) — utilise le micro du clavier à la place.";
+  }
+
   loadModels();
-</script>
+  checkServerStatus();</script>
 
 </body>
 </html>
